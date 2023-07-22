@@ -1,31 +1,42 @@
-use std::io::stdin;
+use std::io::{stdin, stdout};
 use std::process::exit;
-use termion::{event::Key, input::TermRead};
+use terminal_size::{terminal_size, Height, Width};
+use termion::{event::Key, input::TermRead, raw::IntoRawMode};
 
-pub fn check_input() {
+fn quit() -> Key {
+    Key::Ctrl('q')
+}
+
+fn tilde() {
+    print!("{} {}", termion::clear::All, termion::cursor::Goto(1, 1));
+    let size = terminal_size();
+
+    if let Some((Width(_w), Height(h))) = size {
+        for _ in 0..h {
+            println!("~\r");
+        }
+    } else {
+        println!("Unable to get terminal size");
+        exit(2);
+    }
+}
+
+pub fn read_keys() {
+    let _stdout = stdout().into_raw_mode().unwrap();
+    tilde();
+    let mut i = 1;
     for c in stdin().keys() {
-        let character = c.unwrap_or_else(|err| {
-            println!("ERROR: error reading character {}", err);
+        let c = c.unwrap_or_else(|_err| {
+            print!("{} {}", termion::clear::All, termion::cursor::Goto(1, 1));
             exit(1);
         });
-
-        match character {
-            Key::Ctrl('q') => break,
-            Key::Char(c) => {
-                println!("{}\r", c);
-            }
-            Key::Ctrl(c) => {
-                println!("Ctrl-{}\r", c);
-            }
-            Key::Alt(c) => println!("Alt-{}\r", c),
-            Key::Left => println!("<left>\r"),
-            Key::Right => println!("<right>\r"),
-            Key::Up => println!("<up>\r"),
-            Key::Down => println!("<down>\r"),
-            Key::Backspace => println!("<backspace>\r"),
-            _ => {
-                println!("other");
-            }
+        let q = quit();
+        if c == q {
+            println!("Goodbye!");
+            exit(1);
+        } else {
+            println!("{cursor} {:?}\r", c, cursor = termion::cursor::Goto(2, i));
+            i += 1;
         }
     }
 }
