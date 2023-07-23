@@ -1,1 +1,1 @@
-# A rust based terminal text editor
+ A rust based terminal text editor
