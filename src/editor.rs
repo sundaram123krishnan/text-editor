@@ -11,57 +11,46 @@ fn enter() -> Key {
     Key::Char('\n')
 }
 
-fn tilde() {
+fn get_terminal_size() -> (u16, u16) {
     let size = terminal_size();
-    print!("{} {}", termion::clear::All, termion::cursor::Goto(1, 1));
-
-    if let Some((Width(_w), Height(h))) = size {
-        for _ in 0..h {
-            println!("~\r");
-        }
+    if let Some((Width(w), Height(h))) = size {
+        return (w, h);
     } else {
         println!("Unable to get terminal size");
         exit(2);
     }
 }
 
+fn tilde() {
+    print!("{} {}", termion::clear::All, termion::cursor::Goto(1, 1));
+
+    let (_w, h) = get_terminal_size();
+
+    for _ in 0..h {
+        println!("~\r");
+    }
+}
+
 pub fn read_keys() {
     let mut stdout = stdout().into_raw_mode().unwrap();
-    let size = terminal_size();
-    tilde();
+    let _size = terminal_size();
     let mut i = 0;
     let mut j = 2;
-    let mut enter_line = 1;
-    print!("{}", termion::cursor::Goto(2, 1));
-
-    let mut width = 0;
-
-    if let Some((Width(w), Height(_h))) = size {
-        width = w;
-    }
+    let (w, _h) = get_terminal_size();
+    i = w;
+    tilde();
+    print!("{}", termion::cursor::Goto(3, 1));
+    let mut shadow_i = 3;
 
     for c in stdin().keys() {
-        let c = c.unwrap_or_else(|_err| {
-            print!("{} {}", termion::clear::All, termion::cursor::Goto(1, 1));
+        let c = c.unwrap_or_else(|err| {
+            println!("Error parsin keys {}", err);
             exit(1);
         });
 
-        if i < width / 2 {
-            write!(stdout, "{}", termion::cursor::Right(1)).unwrap();
-        } else {
-            write!(stdout, "{}", termion::cursor::Goto(2, j)).unwrap();
-            i = 0;
-            j += 1;
-        }
-
         let q = quit();
-        let e = enter();
+        let _e = enter();
 
-        if c == e {
-            write!(stdout, "{}", termion::cursor::Goto(2, enter_line)).unwrap();
-            enter_line += 1;
-            j = enter_line + 1;
-        }
         if c == q {
             exit(1);
         } else {
@@ -69,8 +58,15 @@ pub fn read_keys() {
                 Key::Char(c) => c,
                 _ => 'q',
             };
-            print!("{c}");
-            i += 1;
+            if shadow_i <= i {
+                write!(stdout, "{c}").unwrap();
+                shadow_i += 1;
+            } else {
+                write!(stdout, "{}", termion::cursor::Goto(3, j)).unwrap();
+                write!(stdout, "{c}").unwrap();
+                shadow_i = 4;
+                j += 1;
+            }
         }
 
         stdout.flush().unwrap();
