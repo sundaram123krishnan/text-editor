@@ -1,3 +1,4 @@
+use colored::*;
 use std::io::{stdin, stdout, Write};
 use std::process::exit;
 use terminal_size::{terminal_size, Height, Width};
@@ -27,7 +28,7 @@ fn tilde() {
     let (_w, h) = get_terminal_size();
 
     for _ in 0..h {
-        println!("~\r");
+        println!("{t}\r", t = "~".yellow().bold());
     }
 }
 
