@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 termion = "1"
 terminal_size = "0.2.6"
+colored = "2.0.4"
