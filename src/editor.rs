@@ -12,6 +12,23 @@ fn enter() -> Key {
     Key::Char('\n')
 }
 
+fn up_arrow() -> Key {
+    Key::Up
+}
+fn left_arrow() -> Key {
+    Key::Left
+}
+fn right_arrow() -> Key {
+    Key::Right
+}
+fn down_arrow() -> Key {
+    Key::Down
+}
+
+fn backspace() -> Key {
+    Key::Backspace
+}
+
 fn get_terminal_size() -> (u16, u16) {
     let size = terminal_size();
     if let Some((Width(w), Height(h))) = size {
@@ -40,6 +57,7 @@ pub fn read_keys() {
     tilde();
     print!("{}", termion::cursor::Goto(3, 1));
     let mut shadow_i = 3;
+    let mut text = String::new();
 
     for c in stdin().keys() {
         let c = c.unwrap_or_else(|err| {
@@ -49,6 +67,11 @@ pub fn read_keys() {
 
         let q = quit();
         let e = enter();
+        let up_arrow = up_arrow();
+        let down_arrow = down_arrow();
+        let left_arrow = left_arrow();
+        let right_arrow = right_arrow();
+        let backspace = backspace();
 
         if c == q {
             exit(1);
@@ -56,17 +79,31 @@ pub fn read_keys() {
             write!(stdout, "{}", termion::cursor::Goto(3, j)).unwrap();
             j += 1;
             shadow_i = 4;
+        } else if c == up_arrow {
+            write!(stdout, "{}", termion::cursor::Up(1)).unwrap();
+            j -= 1;
+        } else if c == down_arrow {
+            write!(stdout, "{}", termion::cursor::Down(1)).unwrap();
+            j += 1;
+        } else if c == left_arrow {
+            write!(stdout, "{}", termion::cursor::Left(1)).unwrap();
+            text.push(' ');
+        } else if c == right_arrow {
+            write!(stdout, "{}", termion::cursor::Right(1)).unwrap();
+            text.push(' ');
         } else {
             let c = match c {
                 Key::Char(c) => c,
                 _ => 'q',
             };
             if shadow_i <= i {
+                text.push(c);
                 write!(stdout, "{c}").unwrap();
                 shadow_i += 1;
             } else {
                 write!(stdout, "{}", termion::cursor::Goto(3, j)).unwrap();
                 write!(stdout, "{c}").unwrap();
+                text.push(c);
                 shadow_i = 4;
                 j += 1;
             }
