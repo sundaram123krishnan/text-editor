@@ -34,11 +34,9 @@ fn tilde() {
 
 pub fn read_keys() {
     let mut stdout = stdout().into_raw_mode().unwrap();
-    let _size = terminal_size();
-    let mut i = 0;
     let mut j = 2;
     let (w, _h) = get_terminal_size();
-    i = w;
+    let i = w;
     tilde();
     print!("{}", termion::cursor::Goto(3, 1));
     let mut shadow_i = 3;
@@ -50,10 +48,14 @@ pub fn read_keys() {
         });
 
         let q = quit();
-        let _e = enter();
+        let e = enter();
 
         if c == q {
             exit(1);
+        } else if c == e {
+            write!(stdout, "{}", termion::cursor::Goto(3, j)).unwrap();
+            j += 1;
+            shadow_i = 4;
         } else {
             let c = match c {
                 Key::Char(c) => c,
