@@ -15,12 +15,15 @@ fn enter() -> Key {
 fn up_arrow() -> Key {
     Key::Up
 }
+
 fn left_arrow() -> Key {
     Key::Left
 }
+
 fn right_arrow() -> Key {
     Key::Right
 }
+
 fn down_arrow() -> Key {
     Key::Down
 }
@@ -79,18 +82,26 @@ pub fn read_keys() {
             write!(stdout, "{}", termion::cursor::Goto(3, j)).unwrap();
             j += 1;
             shadow_i = 4;
+            text.push(' ');
         } else if c == up_arrow {
             write!(stdout, "{}", termion::cursor::Up(1)).unwrap();
             j -= 1;
+            text.push(' ');
         } else if c == down_arrow {
             write!(stdout, "{}", termion::cursor::Down(1)).unwrap();
             j += 1;
+            text.push(' ');
         } else if c == left_arrow {
             write!(stdout, "{}", termion::cursor::Left(1)).unwrap();
             text.push(' ');
         } else if c == right_arrow {
             write!(stdout, "{}", termion::cursor::Right(1)).unwrap();
             text.push(' ');
+        } else if c == backspace {
+            text.pop();
+            write!(stdout, "{}", termion::cursor::Left(1)).unwrap();
+            write!(stdout, " ").unwrap();
+            write!(stdout, "{}", termion::cursor::Left(1)).unwrap();
         } else {
             let c = match c {
                 Key::Char(c) => c,
