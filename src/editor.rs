@@ -60,7 +60,6 @@ pub fn read_keys() {
     tilde();
     print!("{}", termion::cursor::Goto(3, 1));
     let mut shadow_i = 3;
-    let mut text = String::new();
 
     for c in stdin().keys() {
         let c = c.unwrap_or_else(|err| {
@@ -82,23 +81,17 @@ pub fn read_keys() {
             write!(stdout, "{}", termion::cursor::Goto(3, j)).unwrap();
             j += 1;
             shadow_i = 4;
-            text.push(' ');
         } else if c == up_arrow {
             write!(stdout, "{}", termion::cursor::Up(1)).unwrap();
             j -= 1;
-            text.push(' ');
         } else if c == down_arrow {
             write!(stdout, "{}", termion::cursor::Down(1)).unwrap();
             j += 1;
-            text.push(' ');
         } else if c == left_arrow {
             write!(stdout, "{}", termion::cursor::Left(1)).unwrap();
-            text.push(' ');
         } else if c == right_arrow {
             write!(stdout, "{}", termion::cursor::Right(1)).unwrap();
-            text.push(' ');
         } else if c == backspace {
-            text.pop();
             write!(stdout, "{}", termion::cursor::Left(1)).unwrap();
             write!(stdout, " ").unwrap();
             write!(stdout, "{}", termion::cursor::Left(1)).unwrap();
@@ -108,13 +101,12 @@ pub fn read_keys() {
                 _ => 'q',
             };
             if shadow_i <= i {
-                text.push(c);
                 write!(stdout, "{c}").unwrap();
+                write!(stdout, "{}", termion::cursor::BlinkingUnderline).unwrap();
                 shadow_i += 1;
             } else {
                 write!(stdout, "{}", termion::cursor::Goto(3, j)).unwrap();
                 write!(stdout, "{c}").unwrap();
-                text.push(c);
                 shadow_i = 4;
                 j += 1;
             }
