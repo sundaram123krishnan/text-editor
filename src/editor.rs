@@ -52,6 +52,17 @@ fn tilde() {
     }
 }
 
+pub fn print_file(file_name: &mut String) {
+    let mut stdout = stdout().into_raw_mode().unwrap();
+    print!("{} {}", termion::clear::All, termion::cursor::Goto(1, 1));
+
+    for i in file_name.lines() {
+        write!(stdout, "{i}").unwrap();
+        write!(stdout, "\n").unwrap();
+    }
+    stdout.flush().unwrap();
+}
+
 pub fn read_keys() {
     let mut stdout = stdout().into_raw_mode().unwrap();
     let mut j = 2;
@@ -88,7 +99,12 @@ pub fn read_keys() {
             write!(stdout, "{}", termion::cursor::Down(1)).unwrap();
             j += 1;
         } else if c == left_arrow {
-            write!(stdout, "{}", termion::cursor::Left(1)).unwrap();
+            if shadow_i <= 3 {
+                write!(stdout, "{}", termion::cursor::Up(1)).unwrap();
+            } else {
+                write!(stdout, "{}", termion::cursor::Left(1)).unwrap();
+                shadow_i -= 1;
+            }
         } else if c == right_arrow {
             write!(stdout, "{}", termion::cursor::Right(1)).unwrap();
         } else if c == backspace {
