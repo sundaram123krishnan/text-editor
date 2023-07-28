@@ -4,7 +4,6 @@ use crate::editor::read_keys;
 use std::fs;
 use std::process;
 use std::{env, process::exit};
-use termion::event;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
