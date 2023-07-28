@@ -1,4 +1,5 @@
 use colored::*;
+use std::fs::read;
 use std::io::{stdin, stdout, Write};
 use std::process::exit;
 use terminal_size::{terminal_size, Height, Width};
@@ -54,12 +55,16 @@ fn tilde() {
 
 pub fn print_file(file_name: &mut String) {
     let mut stdout = stdout().into_raw_mode().unwrap();
-    print!("{} {}", termion::clear::All, termion::cursor::Goto(1, 1));
+    // print!("{} {}", termion::clear::All, termion::cursor::Goto(1, 1));
+    let mut j = 1;
 
+    tilde();
     for i in file_name.lines() {
-        write!(stdout, "{i}").unwrap();
-        write!(stdout, "\n").unwrap();
+        write!(stdout, "{} {i}", termion::cursor::Goto(3, j)).unwrap();
+        j += 1;
+        write!(stdout, "\r").unwrap();
     }
+    read_keys();
     stdout.flush().unwrap();
 }
 
@@ -68,7 +73,7 @@ pub fn read_keys() {
     let mut j = 2;
     let (w, _h) = get_terminal_size();
     let i = w;
-    tilde();
+    // tilde();
     print!("{}", termion::cursor::Goto(3, 1));
     let mut shadow_i = 3;
 
