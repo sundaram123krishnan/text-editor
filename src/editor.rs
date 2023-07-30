@@ -1,99 +1,54 @@
-use colored::*;
-use crossterm::cursor;
 use std::io::{stdin, stdout, Write};
 use std::process::exit;
-use terminal_size::{terminal_size, Height, Width};
-use termion::{event::Key, input::TermRead, raw::IntoRawMode};
+use termion::event::Key;
+use termion::input::TermRead;
+use termion::raw::IntoRawMode;
 
-fn get_terminal_size() -> (u16, u16) {
-    let size = terminal_size();
-    if let Some((Width(w), Height(h))) = size {
-        return (w, h);
-    } else {
-        println!("Unable to get terminal size");
-        exit(2);
-    }
+pub struct Editor {
+    quit: bool,
 }
 
-fn tilde() {
-    write!(
-        stdout(),
-        "{} {}",
-        termion::clear::All,
-        termion::cursor::Goto(1, 1)
-    )
-    .unwrap();
+impl Editor {
+    pub fn run(&mut self) {
+        let mut stdout = stdout().into_raw_mode().unwrap();
+        loop {
+            let pressed_key = self.process_keys();
 
-    let (_w, h) = get_terminal_size();
-
-    for _ in 0..h {
-        println!("{t}\r", t = "~".yellow().bold());
-    }
-}
-
-// pub fn print_file(file_name: &mut String) {
-//     let mut stdout = stdout().into_raw_mode().unwrap();
-//     tilde();
-//     for i in file_name.lines() {
-//         write!(stdout, "{} {i}", crossterm::cursor::MoveTo(2, col)).unwrap();
-//         write!(stdout, "\r").unwrap();
-//     }
-//     read_keys();
-//     stdout.flush().unwrap();
-// }
-
-pub fn read_keys() {
-    let mut stdout = stdout().into_raw_mode().unwrap();
-    let (w, _h) = get_terminal_size();
-    tilde();
-    print!("{}", cursor::MoveTo(2, 0));
-
-    for c in stdin().keys() {
-        let (row, col) = cursor::position().unwrap();
-
-        let c = c.unwrap_or_else(|err| {
-            println!("Error parsin keys {}", err);
-            exit(1);
-        });
-
-        match c {
-            Key::Char('\n') => {
-                write!(stdout, "{}", cursor::MoveTo(2, col + 1)).unwrap();
-            }
-            Key::Char(c) => {
-                if row <= w - 2 {
-                    write!(stdout, "{c}").unwrap();
-                    write!(stdout, "{}", cursor::EnableBlinking).unwrap();
-                } else {
-                    write!(stdout, "{}", cursor::MoveTo(2, col + 1)).unwrap();
-                    write!(stdout, "{c}").unwrap();
+            if self.quit == true {
+                exit(1);
+            } else {
+                if let Some(_c) = pressed_key {
+                    let pressed_key = match pressed_key {
+                        Some(pressed_key) => pressed_key,
+                        None => exit(1),
+                    };
+                    write!(stdout, "{pressed_key}").unwrap();
                 }
             }
-            Key::Up => {
-                write!(stdout, "{}", cursor::MoveUp(1)).unwrap();
-            }
-            Key::Down => {
-                write!(stdout, "{}", cursor::MoveDown(1)).unwrap();
-            }
-            Key::Left => {
-                write!(stdout, "{}", cursor::MoveLeft(1)).unwrap();
-            }
-            Key::Right => {
-                write!(stdout, "{}", cursor::MoveRight(1)).unwrap();
-            }
-            Key::Backspace => {
-                write!(stdout, "{}", cursor::MoveLeft(1)).unwrap();
-                write!(stdout, " ").unwrap();
-                write!(stdout, "{}", cursor::MoveLeft(1)).unwrap();
-            }
-            Key::Ctrl('q') => {
-                break;
-            }
-
-            _other => {
-                write!(stdout, "other").unwrap();
-            }
+            stdout.flush().unwrap();
         }
-        stdout.flush().unwrap();
+    }
+
+    fn process_keys(&mut self) -> Option<char> {
+        let key_pressed = read_key();
+        match key_pressed {
+            Key::Ctrl('q') => {
+                self.quit = true;
+                return None;
+            }
+            Key::Char(c) => return Some(c),
+            _ => return Some('c'),
+        }
+    }
+
+    pub fn default() -> Self {
+        Self { quit: false }
+    }
+}
+
+fn read_key() -> Key {
+    loop {
+        let key = stdin().keys().next().unwrap();
+        return key.unwrap();
     }
 }
