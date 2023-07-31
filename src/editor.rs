@@ -1,16 +1,28 @@
+use crate::terminal::Terminal;
 use std::io::{stdin, stdout, Write};
 use std::process::exit;
+use termion::cursor;
 use termion::event::Key;
 use termion::input::TermRead;
 use termion::raw::IntoRawMode;
 
 pub struct Editor {
     quit: bool,
+    terminal: Terminal,
 }
 
 impl Editor {
     pub fn run(&mut self) {
         let mut stdout = stdout().into_raw_mode().unwrap();
+        write!(
+            stdout,
+            "{} {}",
+            termion::clear::All,
+            termion::cursor::Goto(1, 1)
+        )
+        .unwrap();
+        self.tilde();
+        write!(stdout, "{}", cursor::Goto(3, 1)).unwrap();
         loop {
             let pressed_key = self.process_keys();
 
@@ -29,6 +41,13 @@ impl Editor {
         }
     }
 
+    fn tilde(&mut self) {
+        let size = self.terminal.size();
+        for _ in 0..size.height {
+            println!("~\r");
+        }
+    }
+
     fn process_keys(&mut self) -> Option<char> {
         let key_pressed = read_key();
         match key_pressed {
@@ -42,7 +61,10 @@ impl Editor {
     }
 
     pub fn default() -> Self {
-        Self { quit: false }
+        Self {
+            quit: false,
+            terminal: Terminal::default().unwrap(),
+        }
     }
 }
 
