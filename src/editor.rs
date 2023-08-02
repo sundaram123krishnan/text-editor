@@ -1,10 +1,6 @@
 use crate::terminal::Terminal;
-use std::io::{stdin, stdout, Write};
 use std::process::exit;
-use termion::cursor;
 use termion::event::Key;
-use termion::input::TermRead;
-use termion::raw::IntoRawMode;
 
 pub struct Editor {
     quit: bool,
@@ -13,16 +9,9 @@ pub struct Editor {
 
 impl Editor {
     pub fn run(&mut self) {
-        let mut stdout = stdout().into_raw_mode().unwrap();
-        write!(
-            stdout,
-            "{} {}",
-            termion::clear::All,
-            termion::cursor::Goto(1, 1)
-        )
-        .unwrap();
+        self.terminal.clear_screen();
         self.tilde();
-        write!(stdout, "{}", cursor::Goto(3, 1)).unwrap();
+        self.terminal.cursor_position(2, 0);
         loop {
             let pressed_key = self.process_keys();
 
@@ -34,10 +23,10 @@ impl Editor {
                         Some(pressed_key) => pressed_key,
                         None => exit(1),
                     };
-                    write!(stdout, "{pressed_key}").unwrap();
+                    print!("{pressed_key}");
                 }
+                self.terminal.flush_output();
             }
-            stdout.flush().unwrap();
         }
     }
 
@@ -49,9 +38,9 @@ impl Editor {
     }
 
     fn process_keys(&mut self) -> Option<char> {
-        let key_pressed = read_key();
+        let key_pressed = Terminal::read_key();
         match key_pressed {
-            Key::Ctrl('q') => {
+            termion::event::Key::Ctrl('q') => {
                 self.quit = true;
                 return None;
             }
@@ -65,12 +54,5 @@ impl Editor {
             quit: false,
             terminal: Terminal::default().unwrap(),
         }
-    }
-}
-
-fn read_key() -> Key {
-    loop {
-        let key = stdin().keys().next().unwrap();
-        return key.unwrap();
     }
 }
