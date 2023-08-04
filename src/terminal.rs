@@ -10,7 +10,7 @@ pub struct Size {
 
 pub struct Terminal {
     size: Size,
-    stdout: RawTerminal<io::Stdout>,
+    pub stdout: RawTerminal<io::Stdout>,
 }
 
 impl Terminal {
@@ -35,6 +35,11 @@ impl Terminal {
             return key.unwrap();
         }
     }
+
+    pub fn start(&mut self) {
+        writeln!(self.stdout, "{}", termion::cursor::Goto(1, 1)).unwrap();
+    }
+
     pub fn clear_screen(&mut self) {
         write!(self.stdout, "{}", termion::clear::All).unwrap();
     }
