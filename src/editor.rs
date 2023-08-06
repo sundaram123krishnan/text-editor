@@ -1,10 +1,19 @@
 use crate::terminal::Terminal;
+use colored::Colorize;
+use std::io::Write;
 use std::process::exit;
 use termion::event::Key;
+
+pub struct Position {
+    pub x: usize,
+    pub y: usize,
+}
 
 pub struct Editor {
     quit: bool,
     terminal: Terminal,
+    welcome_message: String,
+    cursor_pos: Position,
 }
 
 impl Editor {
@@ -13,16 +22,12 @@ impl Editor {
         self.terminal.clear_screen();
         self.tilde();
         self.terminal.start();
-        self.terminal.cursor_position(2, 0);
+        self.terminal.cursor_position(&Position { x: 2, y: 0 });
         loop {
             if ok == false {
-                let size = self.terminal.size();
-                let display_h = size.height / 3;
-                let display_w = size.width / 3;
-                self.terminal.cursor_position(display_w, display_h);
-                print!("{}", termion::clear::CurrentLine);
+                self.clear_message();
                 ok = true;
-                self.terminal.cursor_position(2, 0);
+                self.terminal.cursor_position(&Position { x: 2, y: 0 });
             }
 
             let pressed_key = self.process_keys();
@@ -51,9 +56,14 @@ impl Editor {
         let display_h = size.height / 3;
         let display_w = size.width / 4;
 
-        self.terminal.cursor_position(display_w, display_h);
-        println!("Welcome to LinNote editor -- Version 0.0.1. Create, Edit and Delete");
-        self.terminal.cursor_position(2, 0);
+        self.terminal.cursor_position(&Position {
+            x: display_w as usize,
+            y: display_h as usize,
+        });
+        let value = format!("{}", self.welcome_message);
+        println!("{}", value.blue().bold());
+
+        self.terminal.cursor_position(&Position { x: 2, y: 0 });
     }
 
     fn process_keys(&mut self) -> Option<char> {
@@ -68,10 +78,28 @@ impl Editor {
         }
     }
 
+    fn clear_message(&mut self) {
+        let size = self.terminal.size();
+        let display_h = size.height / 3;
+        let display_w = size.width / 4;
+        self.welcome_message.clear();
+        self.terminal.cursor_position(&Position {
+            x: display_w as usize,
+            y: display_h as usize,
+        });
+        write!(
+            self.terminal.stdout,
+            "                                                                  "
+        )
+        .unwrap();
+    }
+
     pub fn default() -> Self {
         Self {
             quit: false,
             terminal: Terminal::default().unwrap(),
+            welcome_message: String::from("Welcome to Linote -- Version 0.0.1"),
+            cursor_pos: Position { x: 0, y: 0 },
         }
     }
 }
