@@ -30,6 +30,7 @@ impl Terminal {
     pub fn size(&self) -> &Size {
         &self.size
     }
+
     pub fn read_key() -> Key {
         loop {
             let key = stdin().keys().next().unwrap();
@@ -45,11 +46,9 @@ impl Terminal {
         write!(self.stdout, "{}", termion::clear::All).unwrap();
     }
 
-    pub fn cursor_position(&mut self, pos: &Position) {
-        let mut w = pos.x;
-        let mut h = pos.y;
-        w = w.saturating_add(1);
-        h = w.saturating_add(1);
+    pub fn cursor_position(&mut self, w: usize, h: usize) {
+        let w = w.saturating_add(1);
+        let h = h.saturating_add(1);
         write!(self.stdout, "{}", termion::cursor::Goto(w as u16, h as u16)).unwrap();
     }
     pub fn flush_output(&mut self) {
