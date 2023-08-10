@@ -147,6 +147,15 @@ impl Editor {
             Key::Right => {
                 return Some(Key::Right);
             }
+            Key::Left => {
+                return Some(Key::Left);
+            }
+            Key::Up => {
+                return Some(Key::Up);
+            }
+            Key::Down => {
+                return Some(Key::Down);
+            }
 
             _ => return Some(Key::PageUp),
         }
