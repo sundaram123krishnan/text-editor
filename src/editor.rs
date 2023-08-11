@@ -1,5 +1,6 @@
 use crate::terminal::{self, Terminal};
 use colored::Colorize;
+use std::fs::write;
 use std::io::Write;
 use std::process::exit;
 use termion::event::Key;
@@ -31,6 +32,8 @@ impl Editor {
                 self.clear_message();
                 ok = true;
                 self.terminal.cursor_position(2, 0);
+                self.cursor_pos.x = 2;
+                self.cursor_pos.y = 1;
             } else {
                 let pressed_key = self.process_keys();
 
@@ -45,7 +48,7 @@ impl Editor {
                         match pressed_key {
                             Key::Char(c) => {
                                 print!("{c}");
-                                self.cursor_pos.x += 1;
+                                self.print_char();
                             }
 
                             Key::Right => {
@@ -72,27 +75,67 @@ impl Editor {
         }
     }
 
+    fn print_char(&mut self) {
+        if self.cursor_pos.x == 89 {
+            self.cursor_pos.x = 3;
+            self.cursor_pos.y += 1;
+            write!(
+                self.terminal.stdout,
+                "{}",
+                termion::cursor::Goto(self.cursor_pos.x as u16, self.cursor_pos.y as u16)
+            )
+            .unwrap();
+        } else {
+            self.cursor_pos.x += 1;
+        }
+    }
+
     fn move_cursor_right(&mut self) {
-        self.cursor_pos.x += 1;
-        write!(
-            self.terminal.stdout,
-            "{}",
-            termion::cursor::Goto(self.cursor_pos.x as u16, self.cursor_pos.y as u16)
-        )
-        .unwrap();
+        if self.cursor_pos.x == 89 {
+            self.cursor_pos.x = 3;
+            self.cursor_pos.y += 1;
+            write!(
+                self.terminal.stdout,
+                "{}",
+                termion::cursor::Goto(self.cursor_pos.x as u16, self.cursor_pos.y as u16)
+            )
+            .unwrap();
+        } else {
+            self.cursor_pos.x += 1;
+            write!(
+                self.terminal.stdout,
+                "{}",
+                termion::cursor::Goto(self.cursor_pos.x as u16, self.cursor_pos.y as u16)
+            )
+            .unwrap();
+        }
     }
 
     fn move_cursor_left(&mut self) {
-        self.cursor_pos.x -= 1;
-        if self.cursor_pos.x <= 2 {
-            self.cursor_pos.x = 2;
+        if self.cursor_pos.x == 3 && self.cursor_pos.y == 1 {
+            self.cursor_pos.x = 3;
+            self.cursor_pos.y = 1;
+        } else if self.cursor_pos.x == 3 {
+            self.cursor_pos.y -= 1;
+            self.cursor_pos.x = 89;
+            write!(
+                self.terminal.stdout,
+                "{}",
+                termion::cursor::Goto(self.cursor_pos.x as u16, self.cursor_pos.y as u16)
+            )
+            .unwrap();
+        } else {
+            self.cursor_pos.x -= 1;
+            if self.cursor_pos.x <= 2 {
+                self.cursor_pos.x = 2;
+            }
+            write!(
+                self.terminal.stdout,
+                "{}",
+                termion::cursor::Goto(self.cursor_pos.x as u16, self.cursor_pos.y as u16)
+            )
+            .unwrap();
         }
-        write!(
-            self.terminal.stdout,
-            "{}",
-            termion::cursor::Goto(self.cursor_pos.x as u16, self.cursor_pos.y as u16)
-        )
-        .unwrap();
     }
 
     fn move_cursor_down(&mut self) {
@@ -107,8 +150,8 @@ impl Editor {
 
     fn move_cursor_up(&mut self) {
         self.cursor_pos.y -= 1;
-        if self.cursor_pos.y <= 0 {
-            self.cursor_pos.y = 0;
+        if self.cursor_pos.y <= 1 {
+            self.cursor_pos.y = 1;
         }
         write!(
             self.terminal.stdout,
