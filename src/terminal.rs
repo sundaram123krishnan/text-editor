@@ -1,4 +1,3 @@
-use crate::editor::Position;
 use std::io::{self, stdin, stdout, Write};
 use termion::event::Key;
 use termion::input::TermRead;
