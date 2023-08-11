@@ -1,6 +1,5 @@
-use crate::terminal::{self, Terminal};
+use crate::terminal::Terminal;
 use colored::Colorize;
-use std::fs::write;
 use std::io::Write;
 use std::process::exit;
 use termion::event::Key;
@@ -24,11 +23,11 @@ impl Editor {
         self.tilde();
         self.terminal.start();
         self.terminal.cursor_position(2, 0);
-        let Position { mut x, mut y } = self.cursor_pos;
+        let Position { x: _, y: _ } = self.cursor_pos;
         self.cursor_pos.x = 2;
         self.cursor_pos.y = 0;
         loop {
-            if ok == false {
+            if !ok {
                 self.clear_message();
                 ok = true;
                 self.terminal.cursor_position(2, 0);
@@ -37,7 +36,7 @@ impl Editor {
             } else {
                 let pressed_key = self.process_keys();
 
-                if self.quit == true {
+                if self.quit {
                     exit(1);
                 } else {
                     if let Some(_c) = pressed_key {
