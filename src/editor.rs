@@ -1,5 +1,7 @@
+use crate::document::Document;
 use crate::terminal::Terminal;
 use colored::Colorize;
+use std::fs::write;
 use std::io::Write;
 use std::process::exit;
 use termion::event::Key;
@@ -14,6 +16,7 @@ pub struct Editor {
     terminal: Terminal,
     welcome_message: String,
     cursor_pos: Position,
+    document: Document,
 }
 
 impl Editor {
@@ -162,8 +165,14 @@ impl Editor {
 
     fn tilde(&mut self) {
         let size = self.terminal.size();
+
         for _ in 0..size.height {
             println!("~\r");
+        }
+
+        print!("{}", termion::cursor::Goto(3, 0));
+        for i in self.document.rows.iter() {
+            print!("{}", i.string);
         }
 
         let display_h = size.height / 3;
@@ -183,23 +192,14 @@ impl Editor {
         match key_pressed {
             termion::event::Key::Ctrl('q') => {
                 self.quit = true;
-                return None;
+                None
             }
             Key::Char(c) => return Some(Key::Char(c)),
-            Key::Right => {
-                return Some(Key::Right);
-            }
-            Key::Left => {
-                return Some(Key::Left);
-            }
-            Key::Up => {
-                return Some(Key::Up);
-            }
-            Key::Down => {
-                return Some(Key::Down);
-            }
-
-            _ => return Some(Key::PageUp),
+            Key::Right => Some(Key::Right),
+            Key::Left => Some(Key::Left),
+            Key::Up => Some(Key::Up),
+            Key::Down => Some(Key::Down),
+            _ => Some(Key::PageUp),
         }
     }
 
@@ -223,6 +223,7 @@ impl Editor {
             terminal: Terminal::default().unwrap(),
             welcome_message: String::from("Welcome to Linote -- Version 0.0.1"),
             cursor_pos: Position { x: 0, y: 0 },
+            document: Document::open(),
         }
     }
 }
