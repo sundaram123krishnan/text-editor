@@ -1,7 +1,6 @@
 use crate::document::Document;
 use crate::terminal::Terminal;
 use colored::Colorize;
-use std::fs::write;
 use std::io::Write;
 use std::process::exit;
 use termion::event::Key;
@@ -181,7 +180,7 @@ impl Editor {
         self.terminal
             .cursor_position(display_w as usize, display_h as usize);
 
-        let value = format!("{}", self.welcome_message);
+        let value = format!("{}", self.welcome_message.to_string());
         println!("{}", value.blue().bold());
 
         self.terminal.cursor_position(2, 0);
@@ -194,7 +193,7 @@ impl Editor {
                 self.quit = true;
                 None
             }
-            Key::Char(c) => return Some(Key::Char(c)),
+            Key::Char(c) => Some(Key::Char(c)),
             Key::Right => Some(Key::Right),
             Key::Left => Some(Key::Left),
             Key::Up => Some(Key::Up),
