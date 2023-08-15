@@ -1,3 +1,4 @@
+#[deny(clippy::never_loop)]
 use crate::document::Document;
 use crate::terminal::Terminal;
 use colored::Colorize;
@@ -181,7 +182,7 @@ impl Editor {
         self.terminal
             .cursor_position(display_w as usize, display_h as usize);
 
-        let value = format!("{}", self.welcome_message.to_string());
+        let value = self.welcome_message.to_string();
         println!("{}", value.blue().bold());
 
         self.terminal.cursor_position(2, 0);
