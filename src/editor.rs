@@ -170,6 +170,7 @@ impl Editor {
         }
 
         print!("{}", termion::cursor::Goto(3, 0));
+
         for i in self.document.rows.iter() {
             print!("{}", i.string);
         }
