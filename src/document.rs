@@ -9,9 +9,10 @@ pub struct Document {
 impl Document {
     pub fn open() -> Self {
         let mut rows = Vec::new();
-        let contents: String = fs::read_to_string("/home/sundaram/main.cpp").unwrap();
-        let temp_row = Row { string: contents };
-        rows.push(temp_row);
+        let mut contents = fs::read_to_string("/home/sundaram/Desktop/cpp/main.cpp").unwrap();
+        for i in contents.lines() {
+            rows.push(Row::slice(i));
+        }
         Self { rows }
     }
 }
