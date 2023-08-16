@@ -1,4 +1,3 @@
-#[deny(clippy::never_loop)]
 use crate::document::Document;
 use crate::terminal::Terminal;
 use colored::Colorize;
@@ -173,7 +172,7 @@ impl Editor {
         print!("{}", termion::cursor::Goto(3, 0));
 
         for i in self.document.rows.iter() {
-            print!("{}", i.string);
+            println!("{}\r", i.string);
         }
 
         let display_h = size.height / 3;
@@ -185,7 +184,7 @@ impl Editor {
         let value = self.welcome_message.to_string();
         println!("{}", value.blue().bold());
 
-        self.terminal.cursor_position(2, 0);
+        self.terminal.cursor_position(3, 0);
     }
 
     fn process_keys(&mut self) -> Option<Key> {
