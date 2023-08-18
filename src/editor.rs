@@ -51,7 +51,6 @@ impl Editor {
                                 print!("{c}");
                                 self.print_char();
                             }
-
                             Key::Right => {
                                 self.move_cursor_right();
                             }
@@ -77,7 +76,7 @@ impl Editor {
     }
 
     fn print_char(&mut self) {
-        if self.cursor_pos.x == 89 {
+        if self.cursor_pos.x == 112 {
             self.cursor_pos.x = 3;
             self.cursor_pos.y += 1;
             write!(
@@ -92,7 +91,7 @@ impl Editor {
     }
 
     fn move_cursor_right(&mut self) {
-        if self.cursor_pos.x == 89 {
+        if self.cursor_pos.x == 112 {
             self.cursor_pos.x = 3;
             self.cursor_pos.y += 1;
             write!(
@@ -118,7 +117,7 @@ impl Editor {
             self.cursor_pos.y = 1;
         } else if self.cursor_pos.x == 3 {
             self.cursor_pos.y -= 1;
-            self.cursor_pos.x = 89;
+            self.cursor_pos.x = 112;
             write!(
                 self.terminal.stdout,
                 "{}",
@@ -169,11 +168,11 @@ impl Editor {
             println!("~\r");
         }
 
-        print!("{}", termion::cursor::Goto(3, 0));
-
-        for i in self.document.rows.iter() {
-            println!("{}\r", i.string);
-        }
+        // print!("{}", termion::cursor::Goto(3, 0));
+        //
+        // for i in self.document.rows.iter() {
+        //     println!("{}\r", i.string);
+        // }
 
         let display_h = size.height / 3;
         let display_w = size.width / 4;
