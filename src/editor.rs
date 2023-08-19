@@ -1,4 +1,4 @@
-use crate::document::{self, Document};
+use crate::document::Document;
 use crate::row::Row;
 use crate::terminal::Terminal;
 use colored::Colorize;
@@ -147,21 +147,6 @@ impl Editor {
         .unwrap();
     }
 
-    fn print_char(&mut self) {
-        if self.cursor_pos.x == 112 {
-            self.cursor_pos.x = 3;
-            self.cursor_pos.y += 1;
-            write!(
-                self.terminal.stdout,
-                "{}",
-                termion::cursor::Goto(self.cursor_pos.x as u16, self.cursor_pos.y as u16)
-            )
-            .unwrap();
-        } else {
-            self.cursor_pos.x += 1;
-        }
-    }
-
     fn write_single_row(&self, row: &Row) {
         // self.cursor_pos.x = 3;
         // self.cursor_pos.y = 0;
@@ -177,7 +162,7 @@ impl Editor {
         }
 
         for i in &self.document.rows {
-            self.write_single_row(&i);
+            self.write_single_row(i);
         }
 
         let display_h = 42 / 3;
