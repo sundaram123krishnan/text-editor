@@ -1,6 +1,8 @@
-use crate::document::Document;
+use crate::document::{self, Document};
+use crate::row::Row;
 use crate::terminal::Terminal;
 use colored::Colorize;
+use std::env;
 use std::io::Write;
 use std::process::exit;
 use termion::event::Key;
@@ -48,8 +50,7 @@ impl Editor {
                         };
                         match pressed_key {
                             Key::Char(c) => {
-                                print!("{c}");
-                                self.print_char();
+                                print!("{}", c);
                             }
                             Key::Right => {
                                 self.move_cursor_right();
@@ -72,21 +73,6 @@ impl Editor {
                     self.terminal.flush_output();
                 }
             }
-        }
-    }
-
-    fn print_char(&mut self) {
-        if self.cursor_pos.x == 112 {
-            self.cursor_pos.x = 3;
-            self.cursor_pos.y += 1;
-            write!(
-                self.terminal.stdout,
-                "{}",
-                termion::cursor::Goto(self.cursor_pos.x as u16, self.cursor_pos.y as u16)
-            )
-            .unwrap();
-        } else {
-            self.cursor_pos.x += 1;
         }
     }
 
@@ -161,21 +147,41 @@ impl Editor {
         .unwrap();
     }
 
-    fn tilde(&mut self) {
-        let size = self.terminal.size();
+    fn print_char(&mut self) {
+        if self.cursor_pos.x == 112 {
+            self.cursor_pos.x = 3;
+            self.cursor_pos.y += 1;
+            write!(
+                self.terminal.stdout,
+                "{}",
+                termion::cursor::Goto(self.cursor_pos.x as u16, self.cursor_pos.y as u16)
+            )
+            .unwrap();
+        } else {
+            self.cursor_pos.x += 1;
+        }
+    }
 
-        for _ in 0..size.height {
+    fn write_single_row(&self, row: &Row) {
+        // self.cursor_pos.x = 3;
+        // self.cursor_pos.y = 0;
+        print!("{}", termion::cursor::Goto(3, 0));
+        for i in row.string.lines() {
+            println!("{i}\r");
+        }
+    }
+
+    fn tilde(&mut self) {
+        for _ in 0..42 {
             println!("~\r");
         }
 
-        // print!("{}", termion::cursor::Goto(3, 0));
-        //
-        // for i in self.document.rows.iter() {
-        //     println!("{}\r", i.string);
-        // }
+        for i in &self.document.rows {
+            self.write_single_row(&i);
+        }
 
-        let display_h = size.height / 3;
-        let display_w = size.width / 4;
+        let display_h = 42 / 3;
+        let display_w = 90 / 4;
 
         self.terminal
             .cursor_position(display_w as usize, display_h as usize);
@@ -217,12 +223,19 @@ impl Editor {
     }
 
     pub fn default() -> Self {
+        let args: Vec<String> = env::args().collect();
+        let filename = args.get(1);
+        let filename = match filename {
+            Some(f) => &f[..],
+            None => exit(1),
+        };
+
         Self {
             quit: false,
             terminal: Terminal::default().unwrap(),
             welcome_message: String::from("Welcome to Linote -- Version 0.0.1"),
+            document: Document::open(filename),
             cursor_pos: Position { x: 0, y: 0 },
-            document: Document::open(),
         }
     }
 }
