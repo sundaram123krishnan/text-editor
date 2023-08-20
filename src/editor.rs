@@ -145,12 +145,10 @@ impl Editor {
             termion::cursor::Goto(self.cursor_pos.x as u16, self.cursor_pos.y as u16)
         )
         .unwrap();
+        println!("{}", self.cursor_pos.y);
     }
 
     fn write_single_row(&self, row: &Row) {
-        // self.cursor_pos.x = 3;
-        // self.cursor_pos.y = 0;
-        print!("{}", termion::cursor::Goto(3, 0));
         for i in row.string.lines() {
             println!("{i}\r");
         }
@@ -160,9 +158,11 @@ impl Editor {
         for _ in 0..42 {
             println!("~\r");
         }
+        print!("{}", termion::cursor::Goto(3, 0));
 
         for i in &self.document.rows {
             self.write_single_row(i);
+            // println!("{}\r", i.string);
         }
 
         let display_h = 42 / 3;
