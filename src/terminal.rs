@@ -16,11 +16,11 @@ pub struct Terminal {
 impl Terminal {
     pub fn default() -> Result<Self, std::io::Error> {
         let size = termion::terminal_size()?;
-        let (x, y) = size;
+        let (x, _y) = size;
         Ok(Self {
             size: Size {
                 width: x,
-                height: y,
+                height: 300,
             },
             stdout: stdout().into_raw_mode().unwrap(),
         })

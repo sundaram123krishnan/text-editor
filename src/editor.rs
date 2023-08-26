@@ -1,6 +1,6 @@
 use crate::document::Document;
 use crate::row::Row;
-use crate::terminal::Terminal;
+use crate::terminal::{self, Terminal};
 use colored::Colorize;
 use std::env;
 use std::io::Write;
@@ -132,6 +132,7 @@ impl Editor {
             termion::cursor::Goto(self.cursor_pos.x as u16, self.cursor_pos.y as u16)
         )
         .unwrap();
+        print!("{}", termion::scroll::Up(1));
     }
 
     fn move_cursor_up(&mut self) {
@@ -145,7 +146,7 @@ impl Editor {
             termion::cursor::Goto(self.cursor_pos.x as u16, self.cursor_pos.y as u16)
         )
         .unwrap();
-        println!("{}", self.cursor_pos.y);
+        print!("{}", termion::scroll::Down(1));
     }
 
     fn write_single_row(&self, row: &Row) {
@@ -155,24 +156,23 @@ impl Editor {
     }
 
     fn tilde(&mut self) {
-        for _ in 0..42 {
-            println!("~\r");
-        }
+        // for _ in 0.. {
+        //     println!("~\r");
+        // }
         print!("{}", termion::cursor::Goto(3, 0));
 
         for i in &self.document.rows {
             self.write_single_row(i);
-            // println!("{}\r", i.string);
         }
-
-        let display_h = 42 / 3;
-        let display_w = 90 / 4;
-
-        self.terminal
-            .cursor_position(display_w as usize, display_h as usize);
-
-        let value = self.welcome_message.to_string();
-        println!("{}", value.blue().bold());
+        //
+        // let display_h = 42 / 3;
+        // let display_w = 90 / 4;
+        //
+        // self.terminal
+        //     .cursor_position(display_w as usize, display_h as usize);
+        //
+        // let value = self.welcome_message.to_string();
+        // println!("{}", value.blue().bold());
 
         self.terminal.cursor_position(3, 0);
     }
@@ -189,7 +189,7 @@ impl Editor {
             Key::Left => Some(Key::Left),
             Key::Up => Some(Key::Up),
             Key::Down => Some(Key::Down),
-            _ => Some(Key::PageUp),
+            _ => None,
         }
     }
 
